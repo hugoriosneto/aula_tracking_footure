@@ -19,12 +19,6 @@ REM Download sample data
 ECHO Downloading sample data...
 python download_sample_data.py
 
-REM Convert Python scripts to notebooks using jupytext
-ECHO Converting Python scripts to notebooks using jupytext...
-jupytext --to notebook pff.py
-jupytext --to notebook tracking_visualization.py
-ECHO Notebooks created: pff.ipynb and tracking_visualization.ipynb
-
 ECHO.
 ECHO Setup completed successfully!
 ECHO.
