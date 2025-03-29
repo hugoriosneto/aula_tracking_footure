@@ -13,9 +13,10 @@
 # ---
 
 # + [markdown] magic_args="[markdown]"
-# # Visualização de Dados de Rastreamento de Futebol com mplsoccer
+
+# # Dados de Rastreamento de Futebol com mplsoccer
 #
-# Este notebook demonstra como visualizar dados de rastreamento de futebol usando os pacotes `mplsoccer` e `kloppy`. 
+# Este notebook demonstra como visualizar e transformar dados de rastreamento de futebol usando os pacotes `mplsoccer` e `kloppy`. 
 #
 # ## O que são Dados de Rastreamento?
 #
@@ -32,8 +33,11 @@
 # 1. Carregar e entender a estrutura de dados de rastreamento
 # 2. Visualizar posições de jogadores em momentos específicos
 # 3. Criar animações de movimentos de jogadores
-# 4. Analisar padrões de movimento dos jogadores
-# -
+# 4. Calcular métricas físicas como velocidade e aceleração
+# 5. Detectar posse de bola através de algoritmos de proximidade e movimento
+# 6. Analisar jogadores em zonas táticas específicas (como o último terço do campo)
+# 7. Exportar visualizações em diferentes formatos (GIF, MP4, HTML)
+
 
 # %%
 import pandas as pd
@@ -774,6 +778,24 @@ if final_third_frames and len(final_third_frames) > 5:
     
     plt.show()
 
+# + [markdown] magic_args="[markdown]"
+# ## Calculando Velocidade e Aceleração dos Jogadores
+#
+# Uma das análises mais valiosas que podemos fazer com dados de rastreamento é calcular métricas físicas como velocidade e aceleração. Estas métricas são fundamentais para:
+#
+# - Avaliar o desempenho físico dos jogadores durante a partida
+# - Identificar sprints, acelerações e desacelerações
+# - Analisar a capacidade de explosão e resistência dos atletas
+# - Comparar a intensidade de movimento entre diferentes jogadores e posições
+#
+# ### Como as métricas são calculadas?
+#
+# 1. **Velocidade**: Calculada como a taxa de mudança de posição entre frames consecutivos (distância/tempo)
+# 2. **Aceleração**: Calculada como a taxa de mudança de velocidade entre frames consecutivos
+#
+# Ambos os cálculos dependem de conhecer o intervalo de tempo preciso entre os frames (taxa de captura).
+# -
+
 def calcular_velocidade_aceleracao(df, frame_column='frame', player_columns=None, tempo_entre_frames=0.04):
     """
     Calcula a velocidade e aceleração para cada jogador no dataframe de rastreamento.
@@ -858,10 +880,34 @@ def calcular_velocidade_aceleracao(df, frame_column='frame', player_columns=None
 df_com_velocidade_aceleracao = calcular_velocidade_aceleracao(
     df, 
     frame_column='frame_id', 
-    tempo_entre_frames=1/30  # Ajuste conforme a frequência de captura (25fps = 0.04s)
+    tempo_entre_frames=1/30  # Ajuste conforme a frequência de captura (30fps = 1/30s)
 )
 
-# +
+# + [markdown] magic_args="[markdown]"
+# ## Detectando Posse de Bola
+#
+# Uma das informações mais valiosas que podemos extrair dos dados de rastreamento é determinar qual jogador está com a posse da bola em cada momento da partida. Identificar corretamente a posse de bola permite:
+#
+# - Analisar sequências de passes e construção de jogadas
+# - Calcular estatísticas de posse por jogador e equipe
+# - Avaliar a pressão defensiva sobre o portador da bola
+# - Identificar padrões de transição ofensiva/defensiva
+#
+# ### Desafios na detecção de posse de bola
+#
+# Determinar qual jogador está com a bola não é trivial devido a vários fatores:
+#
+# 1. **Proximidade**: Vários jogadores podem estar próximos à bola simultaneamente
+# 2. **Velocidade**: A bola e os jogadores estão em constante movimento
+# 3. **Oclusão**: Em imagens de broadcast, nem sempre todos os jogadores são visíveis
+# 4. **Ruído**: Os dados de rastreamento podem conter imprecisões na posição
+#
+# Para resolver esses desafios, a função abaixo utiliza uma combinação de:
+# - Distância entre jogadores e bola
+# - Similaridade de vetores de velocidade (quando disponíveis)
+# - Sistema de confiança para classificar a posse
+# -
+
 import pandas as pd
 import numpy as np
 from scipy.spatial.distance import euclidean
@@ -988,7 +1034,18 @@ def detectar_jogador_com_bola(df, dist_threshold=1.0, conf_threshold=0.8,
     
     return result_df
 
-
+# + [markdown] magic_args="[markdown]"
+# ### Aplicação da Detecção de Posse
+#
+# Vamos aplicar o algoritmo de detecção de posse de bola aos nossos dados de rastreamento. Para melhorar a precisão da detecção, utilizaremos:
+#
+# - **Dados de posição**: Coordenadas X, Y e Z dos jogadores e da bola
+# - **Dados de velocidade**: Previamente calculados pela função `calcular_velocidade_aceleracao()`
+# - **Parâmetros ajustados**: Limiar de distância e confiança otimizados para futebol
+#
+# Após a detecção, teremos para cada frame:
+# - O ID do jogador que provavelmente está com a bola
+# - Um valor de confiança que indica a certeza dessa detecção
 # -
 
 # Exemplo de uso
