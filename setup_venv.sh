@@ -37,13 +37,6 @@ pip install -r requirements.txt
 echo "Downloading sample data..."
 python download_sample_data.py
 
-# If jupytext is installed, convert the scripts to notebook format for convenience
-if command -v jupytext &> /dev/null; then
-    echo "Converting Python scripts to notebooks using jupytext..."
-    jupytext --to notebook pff.py
-    jupytext --to notebook tracking_visualization.py
-    echo "Notebooks created: pff.ipynb and tracking_visualization.ipynb"
-fi
 
 echo ""
 echo "Setup completed successfully!"
