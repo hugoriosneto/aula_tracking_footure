@@ -48,7 +48,7 @@ Os principais componentes dos dados incluem:
 - **Metadados**: Contém informações do jogo (times, data, etc.) armazenados como `{game_id}.json`
 - **Elencos**: Contém informações das escalações armazenadas como `{game_id}.json`
 
-Você pode baixar dados de exemplo para teste executando:
+Você pode baixar dados de exemplo para teste executando o comando abaixo, mas eles já se encontram no repositório.
 
 ```bash
 python download_sample_data.py
